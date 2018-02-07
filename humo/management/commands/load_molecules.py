@@ -15,9 +15,9 @@ NUM_CORES = 1
 PATH_TO_TRAIN_FILE = "../practicals/P1-regression/train.csv"
 
 # where to start in the dataset
-START_INDEX = 10000
+START_INDEX = 0
 
-DEBUG = True
+DEBUG = False
 
 class Command(BaseCommand):
 

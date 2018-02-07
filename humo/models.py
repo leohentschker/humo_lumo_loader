@@ -21,20 +21,33 @@ class Molecule(models.Model):
         return Chem.MolFromSmiles(self.smile)
 
     def calculate_fingerprint(self):
-        return FingerprintMols.FingerprintMol(self.molecule)
+        fingerprint = FingerprintMols.FingerprintMol(self.molecule)
+        return [2 * idx + val for idx, val in enumerate(fingerprint)]
     
     def save(self, *args, **kwargs):
-        if not self.fingerprint and self.smile:
+        if self.smile:
             self.fingerprint = list(self.calculate_fingerprint())
 
         return super(Molecule, self).save(*args, **kwargs)
+
+    @classmethod
+    def process_mol(cls, val_tuple):
+        idx, (smile, gap) = val_tuple
+        m, _ = Molecule.objects.get_or_create(id=idx)
+        m.smile = smile
+        m.gap = gap
+        m.save()
 
     @classmethod
     def load_molecules(cls, csv_file, num_cores, start_index, testing=True):
         """
         Reads in the data from a pandas csv
         """
+        print ("LOADING DATAFRAME")
+
         df = pd.read_csv(csv_file)
+
+        print ("DATAFRAME LOADED")
 
         # id all the tuples
         smile_gap_tuples = enumerate(zip(df.smiles.values, df.gap.values))
@@ -48,14 +61,4 @@ class Molecule(models.Model):
 
         p = multiprocessing.Pool(num_cores)
 
-        def process_mol(val_tuple):
-            idx, (smile, gap) = val_tuple
-            print (idx, smile, gap)
-            return
-            m, _ = Molecule.objects.get_or_create(id=idx)
-            m.smile = smile
-            m.gap = gap
-            m.save()
-            return Chem.MolFromSmiles(smile)
-
-        p.map(process_mol, smile_gap_tuples)
+        p.map(cls.process_mol, smile_gap_tuples)

@@ -26,6 +26,8 @@ class Command(BaseCommand):
         Watch the log files and
         """
 
+        print ("GLOVAL VARIABLES ARE IN THE FILE", __file__)
+
         print ("REMEMBER TO REPLACE THE GLOBAL VARIABLES ABOVE")
 
         print ("THE FIRST TIME YOU RUN THIS IT SHOULD GO REALLY QUICKLY, AS YOU ARE JUST TESTING")

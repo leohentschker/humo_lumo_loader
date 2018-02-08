@@ -19,6 +19,7 @@ class Molecule(models.Model):
     smile = models.CharField(null=True, unique=True, max_length=100)
     fingerprint = ArrayField(models.IntegerField(), null=True, size=2048)
     coulomb_eigenspace = ArrayField(models.FloatField(), null=True)
+    adjacency_eigenspace = ArrayField(models.FloatField(), null=True)
     gap = models.FloatField(null=True)
 
     class Meta:
@@ -41,12 +42,19 @@ class Molecule(models.Model):
         matrix = self.coulomb_featureizer.coulomb_matrix(mol)
         eigenvalues, _ = np.linalg.eig(matrix)
         return [float(v) for v in np.sort(eigenvalues[0].real)[::-1]]
+
+    def calculate_adjacency(self):
+        matrix = Chem.rdmolops.GetAdjacencyMatrix(self.molecule)
+        eigenvalues, _ = np.linalg.eig(matrix)
+        return [float(v) for v in np.sort(eigenvalues[0].real)[::-1]]
     
     def save(self, *args, **kwargs):
         # if self.smile:
         #     self.fingerprint = list(self.calculate_fingerprint())
+        # if self.smile:
+        #     self.coulomb_eigenspace = self.calculate_coulomb()
         if self.smile:
-            self.coulomb_eigenspace = self.calculate_coulomb()
+            self.adjacency_eigenspace = self.calculate_adjacency()
 
         return super(Molecule, self).save(*args, **kwargs)
 
@@ -60,7 +68,31 @@ class Molecule(models.Model):
         m.save()
 
     @classmethod
-    def load_molecules(cls, csv_file, num_cores, start_index, testing=True):
+    def to_csv(cls, file):
+        """
+        Converts the class method to CSV
+        """
+        molecules = Molecule.objects.filter(id__gt=500000)[:2]
+        print ("LOADED QUERY")
+        vals = molecules.values_list("smile", "coulomb_eigenspace", "gap")
+        data = []
+        for smile, cle, gap in vals:
+            row = {
+                "smile": smile,
+                "gap": gap,
+            }
+
+            for idx, v in enumerate(cle):
+                row[idx] = v
+
+            data.append(row)
+
+        print (data)
+        df = pd.DataFrame(data)
+        df.to_csv(file)
+
+    @classmethod
+    def load_molecules(cls, csv_file, num_cores, start_index, end_index, testing=True):
         """
         Reads in the data from a pandas csv
         """
@@ -74,7 +106,7 @@ class Molecule(models.Model):
         smile_gap_tuples = enumerate(zip(df.smiles.values, df.gap.values))
 
         # don't process tuples we've already seen
-        smile_gap_tuples = list(smile_gap_tuples)[start_index:]
+        smile_gap_tuples = list(smile_gap_tuples)[start_index:end_index]
 
         # if we're resting, just run the first 10
         if testing:

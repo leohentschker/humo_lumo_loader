@@ -105,7 +105,9 @@ DATABASES = {
         'NAME': 'chem',
         'USER': 'chem_user',
         'PASSWORD': "chem_password",
-        'HOST': 'ec2-54-198-204-57.compute-1.amazonaws.com',
+        # 'HOST': 'ec2-54-198-204-57.compute-1.amazonaws.com',
+        # COULOMB
+        'HOST': 'ec2-34-234-225-43.compute-1.amazonaws.com',
         'PORT': '5432',
     }
 }

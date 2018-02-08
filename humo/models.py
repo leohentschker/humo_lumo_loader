@@ -6,8 +6,10 @@ import numpy as np
 
 from rdkit import Chem
 from rdkit.Chem.Fingerprints import FingerprintMols
+from rdkit.Chem import AllChem
+from deepchem.feat.coulomb_matrices import CoulombMatrixEig
 
-import multiprocessing 
+import multiprocessing
 
 class Molecule(models.Model):
     """
@@ -16,11 +18,13 @@ class Molecule(models.Model):
     id = models.IntegerField(primary_key=True)
     smile = models.CharField(null=True, unique=True, max_length=100)
     fingerprint = ArrayField(models.IntegerField(), null=True, size=2048)
-    coulomb_eigenspace = ArrayField(models.IntegerField(), null=True)
+    coulomb_eigenspace = ArrayField(models.FloatField(), null=True)
     gap = models.FloatField(null=True)
 
     class Meta:
         indexes = [GinIndex(fields=["fingerprint"])]
+
+    coulomb_featureizer = CoulombMatrixEig(remove_hydrogens=True, max_atoms=200)
 
     @property
     def molecule(self):
@@ -36,7 +40,7 @@ class Molecule(models.Model):
         Chem.AllChem.UFFOptimizeMoleculeConfs(mol)
         matrix = self.coulomb_featureizer.coulomb_matrix(mol)
         eigenvalues, _ = np.linalg.eig(matrix)
-        return np.sort(eigenvalues[0].real)[::-1]
+        return [float(v) for v in np.sort(eigenvalues[0].real)[::-1]]
     
     def save(self, *args, **kwargs):
         # if self.smile:
@@ -52,6 +56,7 @@ class Molecule(models.Model):
         m, _ = Molecule.objects.get_or_create(id=idx)
         m.smile = smile
         m.gap = gap
+        print (m.id)
         m.save()
 
     @classmethod

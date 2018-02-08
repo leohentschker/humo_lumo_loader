@@ -32,10 +32,10 @@ class Molecule(models.Model):
 
     @classmethod
     def process_mol(cls, val_tuple):
-        idx, (smile, gap) = val_tuple
+        idx, smile = val_tuple
         m, _ = Molecule.objects.get_or_create(id=idx)
         m.smile = smile
-        m.gap = gap
+        # m.gap = gap
         m.save()
 
     @classmethod
@@ -50,7 +50,7 @@ class Molecule(models.Model):
         print ("DATAFRAME LOADED")
 
         # id all the tuples
-        smile_gap_tuples = enumerate(zip(df.smiles.values, df.gap.values))
+        smile_gap_tuples = enumerate(df.smiles.values)
 
         # don't process tuples we've already seen
         smile_gap_tuples = list(smile_gap_tuples)[start_index:]

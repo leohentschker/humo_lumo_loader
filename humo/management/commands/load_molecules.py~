@@ -6,15 +6,16 @@ from humo.models import Molecule
 import multiprocessing
 
 # how many cores should we run this on? cpu_count will do the max
-NUM_CORES = multiprocessing.cpu_count()
+# NUM_CORES = multiprocessing.cpu_count()
+NUM_CORES = 1
 
 # fill in the path to train.csv on your computer
-PATH_TO_TRAIN_FILE = "/home/ubuntu/test.csv"
+PATH_TO_TRAIN_FILE = "/home/ubuntu/train.csv"
 
 # where to start in the dataset
-START_INDEX = 600000
+START_INDEX = 100000
 
-DEBUG = True
+DEBUG = False
 
 class Command(BaseCommand):
 

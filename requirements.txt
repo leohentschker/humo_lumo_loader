@@ -1,0 +1,8 @@
+django==1.11
+djangorestframework
+django-cors-headers
+django-filter
+zappa
+psycopg2
+requests
+django-extensions

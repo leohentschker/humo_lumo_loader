@@ -102,10 +102,10 @@ WSGI_APPLICATION = 'humo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'humo',
-        'USER': 'humo_user',
-        'PASSWORD': "humo",
-        'HOST': 'demo-db.cobb9uhravza.us-east-1.rds.amazonaws.com',
+        'NAME': 'chem',
+        'USER': 'chem_user',
+        'PASSWORD': "chem_password",
+        'HOST': 'ec2-54-198-204-57.compute-1.amazonaws.com',
         'PORT': '5432',
     }
 }

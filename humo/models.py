@@ -2,6 +2,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 import pandas as pd
+import numpy as np
 
 from rdkit import Chem
 from rdkit.Chem.Fingerprints import FingerprintMols
@@ -15,6 +16,7 @@ class Molecule(models.Model):
     id = models.IntegerField(primary_key=True)
     smile = models.CharField(null=True, unique=True, max_length=100)
     fingerprint = ArrayField(models.IntegerField(), null=True, size=2048)
+    coulomb_eigenspace = ArrayField(models.IntegerField(), null=True)
     gap = models.FloatField(null=True)
 
     class Meta:
@@ -27,10 +29,20 @@ class Molecule(models.Model):
     def calculate_fingerprint(self):
         fingerprint = FingerprintMols.FingerprintMol(self.molecule)
         return [2 * idx + val for idx, val in enumerate(fingerprint)]
+
+    def calculate_coulomb(self):
+        mol = Chem.AddHs(self.molecule)
+        Chem.AllChem.EmbedMultipleConfs(mol,1)
+        Chem.AllChem.UFFOptimizeMoleculeConfs(mol)
+        matrix = self.coulomb_featureizer.coulomb_matrix(mol)
+        eigenvalues, _ = np.linalg.eig(matrix)
+        return np.sort(eigenvalues[0].real)[::-1]
     
     def save(self, *args, **kwargs):
+        # if self.smile:
+        #     self.fingerprint = list(self.calculate_fingerprint())
         if self.smile:
-            self.fingerprint = list(self.calculate_fingerprint())
+            self.coulomb_eigenspace = self.calculate_coulomb()
 
         return super(Molecule, self).save(*args, **kwargs)
 

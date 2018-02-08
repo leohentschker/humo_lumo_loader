@@ -12,9 +12,10 @@ NUM_CORES = multiprocessing.cpu_count()
 PATH_TO_TRAIN_FILE = "/home/ubuntu/test.csv"
 
 # where to start in the dataset
-START_INDEX = 600000
+START_INDEX = 0
+END_INDEX = 1000000
 
-DEBUG = True
+DEBUG = False
 
 class Command(BaseCommand):
 
@@ -30,6 +31,6 @@ class Command(BaseCommand):
         print ("THE FIRST TIME YOU RUN THIS IT SHOULD GO REALLY QUICKLY, AS YOU ARE JUST TESTING")
 
         # get rid of this dumb line when you've replaced the variablesk
-        Molecule.load_molecules(PATH_TO_TRAIN_FILE, NUM_CORES, START_INDEX, DEBUG)
+        Molecule.load_molecules(PATH_TO_TRAIN_FILE, NUM_CORES, START_INDEX, END_INDEX, DEBUG)
 
         print ("MAKE DEBUG FALSE AT THE TOP RUN FOR REAL")

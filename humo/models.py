@@ -1,4 +1,5 @@
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 import pandas as pd
 
@@ -15,6 +16,9 @@ class Molecule(models.Model):
     smile = models.CharField(null=True, unique=True, max_length=100)
     fingerprint = ArrayField(models.IntegerField(), null=True, size=2048)
     gap = models.FloatField(null=True)
+
+    class Meta:
+        indexes = [GinIndex(fields=["fingerprint"])]
 
     @property
     def molecule(self):
